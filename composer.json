@@ -1,0 +1,85 @@
+{
+    "name": "mostafax/erp-integration-hub",
+    "description": "Enterprise Integration Platform for ERP Systems — Visual Field Mapping, Multi-ERP Connectors (Dynamics 365, SAP, Oracle, Odoo, ERPNext), Real-Time Monitoring & Sync Scheduler for Laravel",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "erp",
+        "erp-integration",
+        "microsoft-dynamics",
+        "dynamics-365",
+        "business-central",
+        "sap",
+        "oracle",
+        "odoo",
+        "erpnext",
+        "integration",
+        "sync",
+        "etl",
+        "enterprise",
+        "saas",
+        "api-bridge",
+        "field-mapping",
+        "scheduler"
+    ],
+    "homepage": "https://github.com/mostafax2/ERP-Integration-Hub",
+    "authors": [
+        {
+            "name": "Mostafa Elbayyar",
+            "email": "mostafa.m.elbiar2@gmail.com",
+            "role": "Principal Architect & Author"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "illuminate/database": "^10.0|^11.0|^12.0",
+        "illuminate/queue": "^10.0|^11.0|^12.0",
+        "illuminate/events": "^10.0|^11.0|^12.0",
+        "illuminate/bus": "^10.0|^11.0|^12.0",
+        "illuminate/cache": "^10.0|^11.0|^12.0",
+        "illuminate/notifications": "^10.0|^11.0|^12.0",
+        "illuminate/console": "^10.0|^11.0|^12.0",
+        "illuminate/http": "^10.0|^11.0|^12.0",
+        "illuminate/routing": "^10.0|^11.0|^12.0",
+        "guzzlehttp/guzzle": "^7.5",
+        "league/oauth2-client": "^2.7",
+        "spatie/laravel-permission": "^5.0|^6.0",
+        "mostafax/background-processing-engine": "^1.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0",
+        "pestphp/pest": "^2.0",
+        "pestphp/pest-plugin-laravel": "^2.0",
+        "phpstan/phpstan": "^1.10",
+        "laravel/pint": "^1.0",
+        "mockery/mockery": "^1.6",
+        "fakerphp/faker": "^1.23"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mostafax\\ErpIntegrationHub\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mostafax\\ErpIntegrationHub\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mostafax\\ErpIntegrationHub\\Providers\\ErpIntegrationHubServiceProvider"
+            ],
+            "aliases": {
+                "ErpIntegrationHub": "Mostafax\\ErpIntegrationHub\\Facades\\ErpIntegrationHub"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ERP Integration Hub — Enterprise multi-ERP integration platform for Laravel. Connect Microsoft Dynamics, SAP, Oracle, Odoo and more.">
+  <title>ERP Integration Hub — Enterprise Laravel ERP Bridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #3b82f6; --brand-dark: #1d4ed8; --brand-light: #93c5fd;
+      --bg: #0f172a; --bg2: #1e293b; --bg3: #334155;
+      --text: #f1f5f9; --text2: #94a3b8; --text3: #64748b;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --border: #334155; --radius: 12px; --font: 'Inter', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.7; }
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { opacity: .85; }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,23,42,.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
+    .nav-brand svg { width: 32px; height: 32px; }
+    .nav-links { display: flex; gap: 28px; font-size: 14px; font-weight: 500; color: var(--text2); }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { display: flex; gap: 10px; }
+    .btn-nav { padding: 7px 18px; border-radius: 8px; font-size: 13.5px; font-weight: 600; }
+    .btn-ghost { border: 1px solid var(--border); color: var(--text2); }
+    .btn-primary { background: var(--brand); color: white; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center; padding: 100px 20px 80px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,.12) 0%, transparent 70%);
+    }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 9999px; background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.3); color: var(--brand-light); font-size: 13px; font-weight: 500; margin-bottom: 24px; }
+    .hero h1 { font-size: clamp(36px,6vw,72px); font-weight: 900; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 24px; }
+    .hero h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: clamp(16px,2vw,20px); color: var(--text2); max-width: 640px; margin: 0 auto 40px; }
+    .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-hero-primary { padding: 14px 28px; background: var(--brand); color: white; border-radius: var(--radius); font-weight: 700; font-size: 16px; }
+    .btn-hero-secondary { padding: 14px 28px; border: 1px solid var(--border); color: var(--text); border-radius: var(--radius); font-weight: 600; font-size: 16px; }
+
+    /* ── Stats ── */
+    .stats { display: flex; justify-content: center; gap: 64px; flex-wrap: wrap; padding: 48px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .stat { text-align: center; }
+    .stat-num  { font-size: 36px; font-weight: 900; color: var(--brand); }
+    .stat-label { font-size: 14px; color: var(--text2); }
+
+    /* ── Sections ── */
+    section { padding: 80px 40px; max-width: 1200px; margin: 0 auto; }
+    .section-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; background: rgba(59,130,246,.1); color: var(--brand-light); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px; }
+    .section-title { font-size: clamp(28px,4vw,44px); font-weight: 800; margin-bottom: 16px; }
+    .section-sub { font-size: 18px; color: var(--text2); max-width: 600px; }
+
+    /* ── Connectors ── */
+    .connector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 48px; }
+    .connector-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; text-align: center; transition: all .2s;
+    }
+    .connector-card:hover { border-color: var(--brand); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(59,130,246,.15); }
+    .connector-icon { font-size: 36px; margin-bottom: 12px; }
+    .connector-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .connector-status { font-size: 12px; }
+    .connector-status--live { color: var(--success); }
+    .connector-status--soon { color: var(--warning); }
+
+    /* ── Features ── */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 48px; }
+    .feature-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+    .feature-icon { font-size: 32px; margin-bottom: 16px; }
+    .feature-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .feature-desc { font-size: 14px; color: var(--text2); }
+
+    /* ── Install ── */
+    .install-block { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-top: 32px; }
+    .install-block h3 { font-size: 14px; color: var(--text2); font-weight: 600; margin-bottom: 16px; text-transform: uppercase; letter-spacing: .06em; }
+    .code-block { background: var(--bg); border-radius: 8px; padding: 20px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 14px; overflow-x: auto; }
+    .code-block .comment { color: #64748b; }
+    .code-block .cmd     { color: #10b981; }
+    .code-block .str     { color: #60a5fa; }
+    .code-block .kw      { color: #a78bfa; }
+
+    /* ── Architecture ── */
+    .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+    .arch-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .arch-title { font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .arch-list { list-style: none; font-size: 13.5px; color: var(--text2); }
+    .arch-list li { padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+    .arch-list li::before { content: '→'; color: var(--brand); }
+
+    /* ── CTA ── */
+    .cta-section { text-align: center; padding: 100px 20px; background: radial-gradient(ellipse 80% 80% at 50% 100%, rgba(59,130,246,.1) 0%, transparent 70%); }
+    .cta-section h2 { font-size: clamp(28px,5vw,48px); font-weight: 800; margin-bottom: 16px; }
+    .cta-section p { font-size: 18px; color: var(--text2); margin-bottom: 36px; }
+
+    /* ── Footer ── */
+    footer { border-top: 1px solid var(--border); padding: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--text2); }
+    .footer-links { display: flex; gap: 20px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      section { padding: 60px 20px; }
+      .arch-grid { grid-template-columns: 1fr; }
+      .stats { gap: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-brand">
+    <svg viewBox="0 0 40 40" fill="none">
+      <rect width="40" height="40" rx="10" fill="#3b82f6"/>
+      <path d="M10 20h8M22 20h8M20 10v8M20 22v8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="20" cy="20" r="3" fill="white"/>
+    </svg>
+    ERP Integration Hub
+  </div>
+  <div class="nav-links">
+    <a href="#connectors">Connectors</a>
+    <a href="#features">Features</a>
+    <a href="#install">Installation</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#api">API</a>
+    <a href="ar/index.html">العربية</a>
+  </div>
+  <div class="nav-cta">
+    <a href="https://github.com/mostafax2/ERP-Integration-Hub" class="btn-nav btn-ghost">GitHub</a>
+    <a href="#install" class="btn-nav btn-primary">Get Started</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">
+    <span>🚀</span> Enterprise-Grade · Multi-ERP · Laravel
+  </div>
+  <h1>
+    Enterprise ERP<br>
+    <span>Integration Platform</span><br>
+    for Laravel
+  </h1>
+  <p>
+    Connect Microsoft Dynamics, SAP, Oracle, Odoo, and ERPNext to your Laravel application
+    with a visual no-code interface. Zero integration code required.
+  </p>
+  <div class="hero-cta">
+    <a href="#install" class="btn-hero-primary">Install Now →</a>
+    <a href="https://github.com/mostafax2/ERP-Integration-Hub" class="btn-hero-secondary">View on GitHub</a>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">6+</div><div class="stat-label">ERP Connectors</div></div>
+  <div class="stat"><div class="stat-num">100M+</div><div class="stat-label">Records Supported</div></div>
+  <div class="stat"><div class="stat-num">0</div><div class="stat-label">Lines of Integration Code</div></div>
+  <div class="stat"><div class="stat-num">2</div><div class="stat-label">Languages (EN/AR)</div></div>
+</div>
+
+<!-- ERP Connectors -->
+<section id="connectors">
+  <div class="section-badge">Connectors</div>
+  <h2 class="section-title">Connect Any ERP System</h2>
+  <p class="section-sub">Pluggable connector architecture. Add new ERP systems without changing your core code.</p>
+
+  <div class="connector-grid">
+    <div class="connector-card">
+      <div class="connector-icon">⚡</div>
+      <div class="connector-name">Dynamics 365 Business Central</div>
+      <div class="connector-status connector-status--live">✓ Available</div>
+    </div>
+    <div class="connector-card">
+      <div class="connector-icon">💼</div>
+      <div class="connector-name">Dynamics 365 Finance</div>
+      <div class="connector-status connector-status--live">✓ Available</div>
+    </div>
+    <div class="connector-card">
+      <div class="connector-icon">🏭</div>
+      <div class="connector-name">Supply Chain Management</div>
+      <div class="connector-status connector-status--live">✓ Available</div>
+    </div>
+    <div class="connector-card">
+      <div class="connector-icon">🔷</div>
+      <div class="connector-name">SAP S/4HANA</div>
+      <div class="connector-status connector-status--live">✓ Available</div>
+    </div>
+    <div class="connector-card">
+      <div class="connector-icon">☁️</div>
+      <div class="connector-name">Odoo</div>
+      <div class="connector-status connector-status--live">✓ Available</div>
+    </div>
+    <div class="connector-card">
+      <div class="connector-icon">🌿</div>
+      <div class="connector-name">ERPNext</div>
+      <div class="connector-status connector-status--live">✓ Available</div>
+    </div>
+    <div class="connector-card">
+      <div class="connector-icon">🔌</div>
+      <div class="connector-name">Custom ERP / REST API</div>
+      <div class="connector-status connector-status--live">✓ Available</div>
+    </div>
+    <div class="connector-card" style="border-style:dashed;">
+      <div class="connector-icon">+</div>
+      <div class="connector-name">Your ERP</div>
+      <div class="connector-status connector-status--soon">Extend & Add</div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features" style="border-top: 1px solid var(--border);">
+  <div class="section-badge">Features</div>
+  <h2 class="section-title">Everything You Need</h2>
+  <p class="section-sub">From connection wizard to real-time monitoring — all built in.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🧙</div>
+      <div class="feature-title">Connection Wizard</div>
+      <div class="feature-desc">Step-by-step wizard to connect any ERP. Test credentials before saving. Secure credential storage.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🗺️</div>
+      <div class="feature-title">Visual Field Mapping</div>
+      <div class="feature-desc">Drag-and-drop field mapping with auto-map suggestions and 9+ built-in transformers. No code required.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⏰</div>
+      <div class="feature-title">Smart Scheduler</div>
+      <div class="feature-desc">Every minute to monthly — or custom cron expressions. Per-profile timezone support.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Real-Time Monitoring</div>
+      <div class="feature-desc">Live dashboard with auto-refresh. Queue health, success rates, and 14-day activity charts.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔁</div>
+      <div class="feature-title">Retry Management</div>
+      <div class="feature-desc">One-click retry for individual records, entire profiles, or all failed jobs. Configurable max attempts.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <div class="feature-title">High Performance</div>
+      <div class="feature-desc">Lazy collections, chunk processing, parallel workers, and Redis caching. Scales to 100M records.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Enterprise Security</div>
+      <div class="feature-desc">Role-based access control with 10 granular permissions. Encrypted credentials. Audit logging.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌍</div>
+      <div class="feature-title">Arabic + English UI</div>
+      <div class="feature-desc">Complete bilingual admin panel with RTL support. Dark mode and light mode included.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <div class="feature-title">Notifications</div>
+      <div class="feature-desc">Email, database, and Slack notifications for sync completion, failures, and connection issues.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Installation -->
+<section id="install" style="border-top: 1px solid var(--border);">
+  <div class="section-badge">Quick Start</div>
+  <h2 class="section-title">Install in Minutes</h2>
+
+  <div class="install-block">
+    <h3>Step 1 — Install via Composer</h3>
+    <div class="code-block">
+      <span class="comment"># Require the package</span><br>
+      <span class="cmd">composer require</span> <span class="str">mostafax/erp-integration-hub</span>
+    </div>
+  </div>
+
+  <div class="install-block">
+    <h3>Step 2 — Run the Installer</h3>
+    <div class="code-block">
+      <span class="comment"># Publishes config, runs migrations, seeds permissions</span><br>
+      <span class="cmd">php artisan</span> <span class="str">dynamics-bridge:install</span>
+    </div>
+  </div>
+
+  <div class="install-block">
+    <h3>Step 3 — Start Queue Worker</h3>
+    <div class="code-block">
+      <span class="cmd">php artisan</span> <span class="str">queue:work</span> <span class="kw">--queue</span>=<span class="str">dynamics-sync</span>
+    </div>
+  </div>
+
+  <div class="install-block">
+    <h3>Step 4 — Open the Dashboard</h3>
+    <div class="code-block">
+      <span class="comment"># Visit your application at:</span><br>
+      <span class="str">https://your-app.com/dynamics-bridge</span>
+    </div>
+  </div>
+</section>
+
+<!-- Architecture -->
+<section id="architecture" style="border-top: 1px solid var(--border);">
+  <div class="section-badge">Architecture</div>
+  <h2 class="section-title">Enterprise Architecture</h2>
+
+  <div class="arch-grid">
+    <div class="arch-card">
+      <div class="arch-title">🔌 Connector Layer</div>
+      <ul class="arch-list">
+        <li>Pluggable ERP driver system</li>
+        <li>AbstractDynamicsDriver base class</li>
+        <li>OData v4 + JSON-RPC support</li>
+        <li>OAuth2 + API Key + Basic Auth</li>
+        <li>Token caching with auto-refresh</li>
+      </ul>
+    </div>
+    <div class="arch-card">
+      <div class="arch-title">⚙️ Sync Engine</div>
+      <ul class="arch-list">
+        <li>SyncOrchestrator with lazy collections</li>
+        <li>Chunk-based processing (configurable)</li>
+        <li>6 sync modes (manual, incremental…)</li>
+        <li>Per-record failure tracking</li>
+        <li>BPE integration for queue management</li>
+      </ul>
+    </div>
+    <div class="arch-card">
+      <div class="arch-title">🗺️ Field Mapping</div>
+      <ul class="arch-list">
+        <li>FieldMappingEngine with DTO pipeline</li>
+        <li>TransformerFactory (9+ built-in types)</li>
+        <li>Auto-map with similarity scoring</li>
+        <li>Live preview with sample data</li>
+        <li>Custom transformer class support</li>
+      </ul>
+    </div>
+    <div class="arch-card">
+      <div class="arch-title">📐 Clean Architecture</div>
+      <ul class="arch-list">
+        <li>SOLID principles throughout</li>
+        <li>Actions, Services, Repositories pattern</li>
+        <li>Contracts (interfaces) for all drivers</li>
+        <li>DTOs for all data transfer</li>
+        <li>Events & listeners for extensibility</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- API -->
+<section id="api" style="border-top: 1px solid var(--border);">
+  <div class="section-badge">REST API</div>
+  <h2 class="section-title">Complete REST API</h2>
+  <p class="section-sub">Full programmatic control via Sanctum-protected JSON API.</p>
+
+  <div class="install-block" style="margin-top: 32px;">
+    <h3>Key Endpoints</h3>
+    <div class="code-block" style="font-size: 13px; line-height: 1.9;">
+      <span class="comment">── Connections ──────────────────────────────────</span><br>
+      <span class="kw">GET</span>    <span class="str">/api/dynamics-bridge/connections</span><br>
+      <span class="kw">POST</span>   <span class="str">/api/dynamics-bridge/connections</span><br>
+      <span class="kw">POST</span>   <span class="str">/api/dynamics-bridge/connections/{id}/test</span><br>
+      <br>
+      <span class="comment">── Sync Profiles ─────────────────────────────────</span><br>
+      <span class="kw">GET</span>    <span class="str">/api/dynamics-bridge/sync-profiles</span><br>
+      <span class="kw">POST</span>   <span class="str">/api/dynamics-bridge/sync-profiles</span><br>
+      <br>
+      <span class="comment">── Sync Operations ───────────────────────────────</span><br>
+      <span class="kw">POST</span>   <span class="str">/api/dynamics-bridge/sync/run/{profileId}</span><br>
+      <span class="kw">GET</span>    <span class="str">/api/dynamics-bridge/sync/status/{logId}</span><br>
+      <span class="kw">POST</span>   <span class="str">/api/dynamics-bridge/sync/retry-all</span><br>
+      <br>
+      <span class="comment">── Monitoring ────────────────────────────────────</span><br>
+      <span class="kw">GET</span>    <span class="str">/api/dynamics-bridge/monitoring/dashboard</span><br>
+      <span class="kw">GET</span>    <span class="str">/api/dynamics-bridge/monitoring/health</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Start Integrating Today</h2>
+  <p>Enterprise ERP integration with zero lines of integration code.</p>
+  <div class="hero-cta">
+    <a href="#install" class="btn-hero-primary">Get Started Free</a>
+    <a href="https://github.com/mostafax2/ERP-Integration-Hub" class="btn-hero-secondary">⭐ Star on GitHub</a>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div>
+    <strong>ERP Integration Hub</strong> · by
+    <a href="mailto:mostafa.m.elbiar2@gmail.com">Mostafa Elbayyar</a>
+    · MIT License
+  </div>
+  <div class="footer-links">
+    <a href="https://github.com/mostafax2/ERP-Integration-Hub">GitHub</a>
+    <a href="ar/index.html">العربية</a>
+    <a href="#install">Docs</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Detection;
 
 use Illuminate\Support\Facades\File;

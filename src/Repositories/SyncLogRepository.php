@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Repositories;
 
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\LazyCollection;
 use Mostafax\ErpIntegrationHub\Models\SyncLog;
 
 class SyncLogRepository
@@ -26,6 +29,26 @@ class SyncLogRepository
         }
 
         return $query->paginate($perPage);
+    }
+
+    public function cursor(array $filters = []): LazyCollection
+    {
+        $query = SyncLog::with('syncProfile')->latest();
+
+        if ($status = $filters['status'] ?? null) {
+            $query->where('status', $status);
+        }
+        if ($profileId = $filters['sync_profile_id'] ?? null) {
+            $query->where('sync_profile_id', $profileId);
+        }
+        if ($from = $filters['from'] ?? null) {
+            $query->where('created_at', '>=', $from);
+        }
+        if ($to = $filters['to'] ?? null) {
+            $query->where('created_at', '<=', $to);
+        }
+
+        return $query->cursor();
     }
 
     public function find(int $id): SyncLog

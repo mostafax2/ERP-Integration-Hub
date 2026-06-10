@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Security;
 
 use Spatie\Permission\Models\Permission;

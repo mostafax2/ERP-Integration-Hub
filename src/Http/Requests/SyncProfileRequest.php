@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -19,7 +21,10 @@ class SyncProfileRequest extends FormRequest
             'connection_id'       => 'required|integer|exists:dynamics_connections,id',
             'source_model'        => 'required|string',
             'source_key'          => 'nullable|string|max:100',
-            'source_filters'      => 'nullable|array',
+            'source_filters'               => 'nullable|array',
+            'source_filters.*.field'       => 'required|string|max:100',
+            'source_filters.*.operator'    => 'required|in:=,!=,<>,>,<,>=,<=,like,not like,in,not in',
+            'source_filters.*.value'       => 'required',
             'destination_entity'  => 'required|string|max:255',
             'destination_key'     => 'nullable|string|max:100',
             'destination_company' => 'nullable|string|max:255',

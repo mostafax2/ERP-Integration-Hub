@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
@@ -14,6 +16,8 @@ class FieldMappingController extends Controller
 {
     public function index(int $profileId): JsonResponse
     {
+        $this->authorize('view_sync_profiles');
+
         $profile  = SyncProfile::findOrFail($profileId);
         $mappings = $profile->allFieldMappings()->orderBy('sort_order')->get();
         return response()->json(['data' => $mappings]);
@@ -21,9 +25,9 @@ class FieldMappingController extends Controller
 
     public function store(Request $request, int $profileId): JsonResponse
     {
-        $profile = SyncProfile::findOrFail($profileId);
+        $this->authorize('manage_sync_profiles');
 
-        // Upsert batch of mappings
+        $profile      = SyncProfile::findOrFail($profileId);
         $mappingsData = $request->input('mappings', []);
         $profile->allFieldMappings()->delete();
 
@@ -39,28 +43,51 @@ class FieldMappingController extends Controller
 
     public function update(Request $request, int $profileId, int $mappingId): JsonResponse
     {
+        $this->authorize('manage_sync_profiles');
+
+        $allowed = config('erp-integration-hub.allowed_transformers', []);
+
+        $data = $request->validate([
+            'source_field'          => 'sometimes|required|string|max:255',
+            'destination_field'     => 'sometimes|required|string|max:255',
+            'transformation'        => 'nullable|string',
+            'transformation_config' => 'nullable|array',
+            'default_value'         => 'nullable|string',
+            'is_required'           => 'nullable|boolean',
+            'is_ignored'            => 'nullable|boolean',
+            'is_key_field'          => 'nullable|boolean',
+            'custom_transformer'    => ['nullable', 'string', 'in:' . implode(',', $allowed)],
+            'sort_order'            => 'nullable|integer',
+            'notes'                 => 'nullable|string',
+        ]);
+
         $mapping = FieldMapping::where('sync_profile_id', $profileId)->findOrFail($mappingId);
-        $mapping->update($request->all());
+        $mapping->update($data);
         return response()->json(['data' => $mapping, 'message' => 'Mapping updated.']);
     }
 
     public function destroy(int $profileId, int $mappingId): JsonResponse
     {
+        $this->authorize('manage_sync_profiles');
+
         FieldMapping::where('sync_profile_id', $profileId)->findOrFail($mappingId)->delete();
         return response()->json(['message' => 'Mapping deleted.']);
     }
 
     public function preview(Request $request, int $profileId): JsonResponse
     {
-        $profile  = SyncProfile::with('allFieldMappings')->findOrFail($profileId);
-        $engine   = new FieldMappingEngine($profile);
-        $sample   = $request->input('sample', []);
-        $result   = $engine->preview($sample);
+        $this->authorize('view_sync_profiles');
+
+        $profile = SyncProfile::with('allFieldMappings')->findOrFail($profileId);
+        $engine  = new FieldMappingEngine($profile);
+        $result  = $engine->preview($request->input('sample', []));
         return response()->json(['data' => $result]);
     }
 
     public function transformers(): JsonResponse
     {
+        $this->authorize('view_sync_profiles');
+
         $types = TransformerFactory::all();
         $data  = array_map(fn($t) => ['value' => $t, 'label' => ucwords(str_replace('_', ' ', $t))], $types);
         return response()->json(['data' => $data]);
@@ -68,13 +95,16 @@ class FieldMappingController extends Controller
 
     public function autoMap(Request $request, int $profileId): JsonResponse
     {
-        $profile    = SyncProfile::findOrFail($profileId);
-        $source     = $request->input('source_fields', []);
+        $this->authorize('manage_sync_profiles');
+
+        SyncProfile::findOrFail($profileId); // verify profile exists
+
+        $source      = $request->input('source_fields', []);
         $destination = $request->input('destination_fields', []);
 
         $suggestions = [];
         foreach ($source as $sourceField) {
-            $best = $this->findBestMatch($sourceField, $destination);
+            $best          = $this->findBestMatch($sourceField, $destination);
             $suggestions[] = [
                 'source_field'      => $sourceField,
                 'destination_field' => $best['field'],

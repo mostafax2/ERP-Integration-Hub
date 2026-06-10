@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Contracts;
 
 use Mostafax\ErpIntegrationHub\DTOs\SyncResultDTO;

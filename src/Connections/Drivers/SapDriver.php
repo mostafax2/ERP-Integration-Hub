@@ -1,19 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Connections\Drivers;
 
 use Mostafax\ErpIntegrationHub\Exceptions\ConnectionException;
 
-/**
- * SAP S/4HANA OData v4 connector — Phase 2 implementation.
- * SAP uses BasicAuth or OAuth2 depending on the environment.
- */
 class SapDriver extends AbstractDynamicsDriver
 {
     protected function resolveBaseUrl(): string
     {
         return $this->connection->base_url
             ?: 'https://{hostname}:443/sap/opu/odata/sap';
+    }
+
+    public function connect(): bool
+    {
+        try {
+            $extra    = $this->connection->extra_config ?? [];
+            $authType = $extra['auth_type'] ?? 'basic';
+
+            if ($authType === 'bearer') {
+                $this->authScheme   = 'Bearer';
+                $this->accessToken  = $this->tokenManager->getToken($this->connection);
+            } else {
+                // SAP on-premise uses HTTP Basic Auth (username:password)
+                $this->authScheme  = 'Basic';
+                $this->accessToken = base64_encode(
+                    "{$this->connection->client_id}:{$this->connection->decrypted_client_secret}"
+                );
+            }
+
+            $this->get('');
+            $this->connection->markAsConnected();
+            return true;
+        } catch (\Throwable $e) {
+            $this->connection->markAsError($e->getMessage());
+            return false;
+        }
     }
 
     public function fetchEntities(): array
@@ -68,11 +92,8 @@ class SapDriver extends AbstractDynamicsDriver
 
     public function test(): array
     {
-        try {
-            $this->get('');
-            return ['success' => true, 'message' => 'SAP connection successful'];
-        } catch (\Throwable $e) {
-            return ['success' => false, 'message' => $e->getMessage()];
-        }
+        return $this->connect()
+            ? ['success' => true, 'message' => 'SAP connection successful']
+            : ['success' => false, 'message' => 'SAP authentication failed'];
     }
 }

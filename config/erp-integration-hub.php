@@ -14,6 +14,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Allowed Custom Transformers
+    | Only classes listed here can be used as custom_transformer in FieldMappings.
+    | Register your own transformer classes: implement TransformerInterface.
+    |--------------------------------------------------------------------------
+    */
+    'allowed_transformers' => [
+        // Example: \App\Transformers\MyCustomTransformer::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Route Configuration
     |--------------------------------------------------------------------------
     */
@@ -61,6 +72,30 @@ return [
             'driver'   => \Mostafax\ErpIntegrationHub\Connections\Drivers\SupplyChainDriver::class,
             'base_url' => 'https://{environment}.operations.dynamics.com/data',
             'icon'     => 'dynamics-scm',
+        ],
+        'sap' => [
+            'label'    => 'SAP S/4HANA',
+            'driver'   => \Mostafax\ErpIntegrationHub\Connections\Drivers\SapDriver::class,
+            'base_url' => 'https://{hostname}:443/sap/opu/odata/sap',
+            'icon'     => 'sap',
+        ],
+        'odoo' => [
+            'label'    => 'Odoo',
+            'driver'   => \Mostafax\ErpIntegrationHub\Connections\Drivers\OdooDriver::class,
+            'base_url' => 'https://your-odoo.odoo.com',
+            'icon'     => 'odoo',
+        ],
+        'erpnext' => [
+            'label'    => 'ERPNext',
+            'driver'   => \Mostafax\ErpIntegrationHub\Connections\Drivers\ErpNextDriver::class,
+            'base_url' => 'https://your-erpnext.com/api/resource',
+            'icon'     => 'erpnext',
+        ],
+        'custom' => [
+            'label'    => 'Custom REST / API',
+            'driver'   => \Mostafax\ErpIntegrationHub\Connections\Drivers\CustomDriver::class,
+            'base_url' => 'https://api.example.com',
+            'icon'     => 'custom',
         ],
     ],
 

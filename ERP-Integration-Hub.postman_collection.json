@@ -1,0 +1,1313 @@
+{
+  "info": {
+    "_postman_id": "erp-integration-hub-v1",
+    "name": "ERP Integration Hub — mostafax/erp-integration-hub",
+    "description": "# ERP Integration Hub API\n\nباكدج Laravel لتكامل أنظمة ERP (Dynamics 365, SAP, Odoo, ERPNext, Custom REST).\n\n## المتطلبات\n- Laravel Sanctum مفعّل\n- المستخدم يملك أحد الأدوار: `erp_admin` | `erp_operator` | `erp_viewer`\n\n## المتغيرات\n| المتغير | القيمة الافتراضية | الوصف |\n|---------|-------------------|-------|\n| `base_url` | `http://localhost` | عنوان التطبيق |\n| `api_prefix` | `api/erp-integration-hub` | prefix للـ API |\n| `token` | — | Sanctum Bearer Token |\n| `connection_id` | `1` | ID اتصال ERP |\n| `profile_id` | `1` | ID ملف المزامنة |\n| `log_id` | `1` | ID سجل المزامنة |\n| `failed_id` | `1` | ID مزامنة فاشلة |\n| `schedule_id` | `1` | ID الجدول الزمني |\n\n## التوثيق\nجميع الطلبات تستخدم `Bearer Token` في الـ Authorization header.\n\n## الملاحظات الأمنية\n- `source_filters.operator` يقبل فقط: `= != <> > < >= <= like not like in not in`\n- `custom_transformer` يجب أن يكون مسجلاً في `config('erp-integration-hub.allowed_transformers')`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",    "value": "http://localhost",           "type": "string" },
+    { "key": "api_prefix",  "value": "api/erp-integration-hub",   "type": "string" },
+    { "key": "token",       "value": "YOUR_SANCTUM_TOKEN_HERE",   "type": "string" },
+    { "key": "connection_id","value": "1",                         "type": "string" },
+    { "key": "profile_id",  "value": "1",                         "type": "string" },
+    { "key": "log_id",      "value": "1",                         "type": "string" },
+    { "key": "failed_id",   "value": "1",                         "type": "string" },
+    { "key": "schedule_id", "value": "1",                         "type": "string" },
+    { "key": "mapping_id",  "value": "1",                         "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+
+    {
+      "name": "🔌 Connections",
+      "description": "إدارة اتصالات أنظمة ERP (Business Central, Finance, SAP, Odoo, ERPNext, Custom).\n\n**الصلاحيات المطلوبة:**\n- `view_connections` — قراءة\n- `manage_connections` — إنشاء / تعديل / حذف / اختبار",
+      "item": [
+
+        {
+          "name": "List Connections",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections?per_page=15&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections"],
+              "query": [
+                { "key": "per_page", "value": "15",  "description": "عدد النتائج في الصفحة" },
+                { "key": "page",     "value": "1",   "description": "رقم الصفحة" }
+              ]
+            },
+            "description": "**الصلاحية:** `view_connections`\n\nيُعيد قائمة مُرقَّمة بجميع اتصالات ERP المسجَّلة."
+          },
+          "response": [
+            {
+              "name": "200 OK — Connection List",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Dynamics 365 BC Production\",\n      \"slug\": \"dynamics-365-bc-production\",\n      \"driver\": \"business_central\",\n      \"driver_label\": \"Microsoft Dynamics 365 Business Central\",\n      \"environment_name\": \"production\",\n      \"tenant_id\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\n      \"client_id\": \"yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy\",\n      \"company_id\": \"CRONUS\",\n      \"status\": \"connected\",\n      \"status_message\": null,\n      \"is_default\": true,\n      \"last_connected_at\": \"2026-06-10T10:30:00.000000Z\",\n      \"last_tested_at\": \"2026-06-10T10:30:00.000000Z\",\n      \"sync_profiles_count\": 3,\n      \"created_at\": \"2026-06-01T08:00:00.000000Z\",\n      \"updated_at\": \"2026-06-10T10:30:00.000000Z\"\n    }\n  ],\n  \"meta\": {\n    \"current_page\": 1,\n    \"per_page\": 15,\n    \"total\": 1\n  }\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Create Connection — Business Central",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dynamics 365 BC Production\",\n  \"driver\": \"business_central\",\n  \"tenant_id\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\n  \"client_id\": \"yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy\",\n  \"client_secret\": \"your-azure-app-secret\",\n  \"environment_name\": \"production\",\n  \"company_id\": \"CRONUS International Ltd.\",\n  \"is_default\": true,\n  \"test_after_create\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections"]
+            },
+            "description": "**الصلاحية:** `manage_connections`\n\n**الحقول المطلوبة لـ Microsoft Drivers:** `tenant_id`, `client_id`, `client_secret`\n\n**test_after_create:** إذا كان `true` يختبر الاتصال مباشرةً بعد الإنشاء."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Dynamics 365 BC Production\",\n    \"driver\": \"business_central\",\n    \"status\": \"connected\",\n    \"is_default\": true,\n    \"last_connected_at\": \"2026-06-10T10:30:00.000000Z\"\n  },\n  \"message\": \"Connection created successfully.\"\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Create Connection — SAP S/4HANA",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"SAP S/4HANA Production\",\n  \"driver\": \"sap\",\n  \"client_id\": \"SAP_USERNAME\",\n  \"client_secret\": \"SAP_PASSWORD\",\n  \"base_url\": \"https://my-sap.example.com:443/sap/opu/odata/sap\",\n  \"extra_config\": {\n    \"auth_type\": \"basic\"\n  },\n  \"is_default\": false,\n  \"test_after_create\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections"]
+            },
+            "description": "SAP يستخدم Basic Auth (username:password) بشكل افتراضي.\n\n**auth_type المدعومة:** `basic` | `bearer`"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create Connection — Odoo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Odoo 16 Production\",\n  \"driver\": \"odoo\",\n  \"client_id\": \"odoo_user\",\n  \"client_secret\": \"odoo_password\",\n  \"base_url\": \"https://mycompany.odoo.com\",\n  \"extra_config\": {\n    \"database\": \"mycompany_prod\",\n    \"login\": \"admin\"\n  },\n  \"test_after_create\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections"]
+            },
+            "description": "Odoo يستخدم JSON-RPC 2.0.\n\n**extra_config:** `database` (اسم قاعدة البيانات), `login` (اسم المستخدم)"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create Connection — ERPNext",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ERPNext Production\",\n  \"driver\": \"erpnext\",\n  \"client_id\": \"api_key_here\",\n  \"client_secret\": \"api_secret_here\",\n  \"base_url\": \"https://erp.mycompany.com\",\n  \"test_after_create\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections"]
+            },
+            "description": "ERPNext يستخدم Token Auth (api_key:api_secret)."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create Connection — Custom REST",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Internal ERP API\",\n  \"driver\": \"custom\",\n  \"client_id\": \"api_client_id\",\n  \"client_secret\": \"api_client_secret\",\n  \"base_url\": \"https://internal-erp.example.com/api/v1\",\n  \"extra_config\": {\n    \"auth_type\": \"bearer\",\n    \"test_endpoint\": \"health\",\n    \"entities_endpoint\": \"entities\",\n    \"entities_path\": \"data\",\n    \"fields_endpoint\": \"{entity}/schema\",\n    \"key_field\": \"uuid\"\n  },\n  \"test_after_create\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections"]
+            },
+            "description": "**auth_type:** `bearer` | `basic` | `api_key` | `none`\n\n**extra_config المتاحة:**\n- `auth_type` — نوع المصادقة\n- `test_endpoint` — endpoint للاختبار\n- `entities_endpoint` — endpoint لجلب الكيانات\n- `entities_path` — المسار داخل الـ response (dot notation)\n- `fields_endpoint` — يدعم `{entity}` placeholder\n- `key_field` — الحقل المفتاحي للـ upsert"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Connection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections/{{connection_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections", "{{connection_id}}"]
+            },
+            "description": "**الصلاحية:** `view_connections`"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Connection",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dynamics 365 BC Production (Updated)\",\n  \"driver\": \"business_central\",\n  \"tenant_id\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\n  \"client_id\": \"yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy\",\n  \"client_secret\": \"new-rotated-secret\",\n  \"environment_name\": \"production\",\n  \"company_id\": \"CRONUS International Ltd.\",\n  \"is_default\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections/{{connection_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections", "{{connection_id}}"]
+            },
+            "description": "**الصلاحية:** `manage_connections`\n\n⚠️ تغيير `client_secret` يُبطل الـ token المخزَّن في Redis."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Delete Connection",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections/{{connection_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections", "{{connection_id}}"]
+            },
+            "description": "**الصلاحية:** `manage_connections`\n\n⚠️ لا يمكن حذف اتصال وهو يُشغّل sync نشط."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Connection deleted.\"\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Test Connection",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections/{{connection_id}}/test",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections", "{{connection_id}}", "test"]
+            },
+            "description": "**الصلاحية:** `manage_connections`\n\nيتصل بـ ERP ويتحقق من صحة الـ credentials. يُحدّث `status` و`last_tested_at`."
+          },
+          "response": [
+            {
+              "name": "200 — Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Connection successful\",\n  \"driver\": \"BusinessCentralDriver\",\n  \"tested_at\": \"2026-06-10T10:30:00.000000Z\"\n}"
+            },
+            {
+              "name": "422 — Failed",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"success\": false,\n  \"message\": \"401 Unauthorized: AADSTS70011 - The provided value for the input parameter 'scope' is not valid.\"\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "List ERP Entities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections/{{connection_id}}/entities",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections", "{{connection_id}}", "entities"]
+            },
+            "description": "**الصلاحية:** `view_connections`\n\nيجلب قائمة الكيانات من ERP مع Redis cache (TTL: 5 دقائق).\n\nمثال الإخراج لـ Business Central: Customers, Vendors, Items, SalesOrders, PurchaseOrders..."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    { \"name\": \"customers\",      \"kind\": \"EntitySet\", \"url\": \"customers\" },\n    { \"name\": \"vendors\",        \"kind\": \"EntitySet\", \"url\": \"vendors\" },\n    { \"name\": \"items\",          \"kind\": \"EntitySet\", \"url\": \"items\" },\n    { \"name\": \"salesOrders\",    \"kind\": \"EntitySet\", \"url\": \"salesOrders\" },\n    { \"name\": \"purchaseOrders\", \"kind\": \"EntitySet\", \"url\": \"purchaseOrders\" },\n    { \"name\": \"generalLedgerEntries\", \"kind\": \"EntitySet\", \"url\": \"generalLedgerEntries\" }\n  ]\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Get Entity Fields",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections/{{connection_id}}/entities/customers/fields",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections", "{{connection_id}}", "entities", "customers", "fields"]
+            },
+            "description": "**الصلاحية:** `view_connections`\n\nيجلب حقول كيان محدد من ERP. مفيد لبناء field mappings."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    { \"name\": \"id\",              \"type\": \"Edm.Guid\",    \"nullable\": false },\n    { \"name\": \"number\",          \"type\": \"Edm.String\",  \"nullable\": false },\n    { \"name\": \"displayName\",     \"type\": \"Edm.String\",  \"nullable\": true  },\n    { \"name\": \"email\",           \"type\": \"Edm.String\",  \"nullable\": true  },\n    { \"name\": \"phoneNumber\",     \"type\": \"Edm.String\",  \"nullable\": true  },\n    { \"name\": \"taxRegistrationNumber\", \"type\": \"Edm.String\", \"nullable\": true },\n    { \"name\": \"currencyCode\",    \"type\": \"Edm.String\",  \"nullable\": true  },\n    { \"name\": \"balance\",         \"type\": \"Edm.Decimal\", \"nullable\": true  },\n    { \"name\": \"lastModifiedDateTime\", \"type\": \"Edm.DateTimeOffset\", \"nullable\": false }\n  ]\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "List Available Drivers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/connections/drivers",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "connections", "drivers"]
+            },
+            "description": "**الصلاحية:** `view_connections`\n\nيُعيد قائمة جميع drivers المُسجَّلة في config."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    { \"value\": \"business_central\", \"label\": \"Microsoft Dynamics 365 Business Central\", \"icon\": \"dynamics-bc\" },\n    { \"value\": \"dynamics_finance\",  \"label\": \"Microsoft Dynamics 365 Finance\",           \"icon\": \"dynamics-finance\" },\n    { \"value\": \"supply_chain\",      \"label\": \"Microsoft Dynamics 365 Supply Chain Management\", \"icon\": \"dynamics-scm\" },\n    { \"value\": \"sap\",              \"label\": \"SAP S/4HANA\",                              \"icon\": \"sap\" },\n    { \"value\": \"odoo\",             \"label\": \"Odoo\",                                     \"icon\": \"odoo\" },\n    { \"value\": \"erpnext\",          \"label\": \"ERPNext\",                                  \"icon\": \"erpnext\" },\n    { \"value\": \"custom\",           \"label\": \"Custom REST / API\",                        \"icon\": \"custom\" }\n  ]\n}"
+            }
+          ]
+        }
+
+      ]
+    },
+
+    {
+      "name": "📋 Sync Profiles",
+      "description": "إدارة ملفات المزامنة — تُعرِّف المصدر (Eloquent model) والوجهة (ERP entity) وإعدادات التزامن.\n\n**الصلاحيات:**\n- `view_sync_profiles` — قراءة\n- `manage_sync_profiles` — إنشاء / تعديل / حذف",
+      "item": [
+
+        {
+          "name": "List Sync Profiles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles?per_page=15&status=active&connection_id=1&search=customer",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles"],
+              "query": [
+                { "key": "per_page",      "value": "15",       "description": "عدد النتائج" },
+                { "key": "status",        "value": "active",   "description": "active | inactive | paused" },
+                { "key": "connection_id", "value": "1",        "description": "فلترة حسب الاتصال" },
+                { "key": "search",        "value": "customer", "description": "بحث في الاسم" }
+              ]
+            },
+            "description": "**الصلاحية:** `view_sync_profiles`"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create Sync Profile",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Customers → BC Sync\",\n  \"description\": \"مزامنة العملاء من Laravel إلى Business Central\",\n  \"connection_id\": 1,\n  \"source_model\": \"App\\\\Models\\\\Customer\",\n  \"source_key\": \"id\",\n  \"source_filters\": [\n    { \"field\": \"is_active\",  \"operator\": \"=\",  \"value\": true },\n    { \"field\": \"created_at\", \"operator\": \">=\", \"value\": \"2024-01-01\" }\n  ],\n  \"destination_entity\": \"customers\",\n  \"destination_key\": \"number\",\n  \"destination_company\": \"CRONUS International Ltd.\",\n  \"sync_mode\": \"incremental\",\n  \"direction\": \"push\",\n  \"conflict_resolution\": \"source_wins\",\n  \"status\": \"active\",\n  \"chunk_size\": 500,\n  \"retry_limit\": 3,\n  \"priority\": 10,\n  \"delete_on_remove\": false,\n  \"field_mappings\": [\n    {\n      \"source_field\": \"name\",\n      \"destination_field\": \"displayName\",\n      \"transformation\": \"none\",\n      \"is_required\": true\n    },\n    {\n      \"source_field\": \"email\",\n      \"destination_field\": \"email\",\n      \"transformation\": \"lowercase\",\n      \"is_required\": false\n    },\n    {\n      \"source_field\": \"tax_number\",\n      \"destination_field\": \"taxRegistrationNumber\",\n      \"transformation\": \"none\",\n      \"is_required\": false\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`\n\n**sync_mode:** `manual` | `scheduled` | `incremental` | `full` | `realtime` | `event_driven`\n\n**direction:** `push` (Laravel → ERP) | `pull` (ERP → Laravel) | `bidirectional`\n\n**conflict_resolution:** `source_wins` | `destination_wins` | `manual`\n\n**source_filters.operator المسموح بها:** `= != <> > < >= <= like not like in not in`"
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Customers → BC Sync\",\n    \"slug\": \"customers-bc-sync\",\n    \"status\": \"active\",\n    \"sync_mode\": \"incremental\",\n    \"direction\": \"push\",\n    \"last_synced_at\": null,\n    \"is_running\": false,\n    \"field_mappings\": [...]\n  },\n  \"message\": \"Sync profile created successfully.\"\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Get Sync Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/{{profile_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "{{profile_id}}"]
+            },
+            "description": "**الصلاحية:** `view_sync_profiles`\n\nيُعيد الملف الكامل مع field_mappings وschedules وإحصائيات."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Sync Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Customers → BC Sync (Updated)\",\n  \"connection_id\": 1,\n  \"source_model\": \"App\\\\Models\\\\Customer\",\n  \"destination_entity\": \"customers\",\n  \"sync_mode\": \"full\",\n  \"direction\": \"push\",\n  \"status\": \"active\",\n  \"chunk_size\": 1000,\n  \"retry_limit\": 5\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/{{profile_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "{{profile_id}}"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`\n\n⚠️ إرسال `field_mappings` يحذف الموجودة ويُنشئ الجديدة."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Delete Sync Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/{{profile_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "{{profile_id}}"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Detect Laravel Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/detect-models",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "detect-models"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`\n\nيكتشف تلقائياً جميع نماذج Eloquent في التطبيق من المسارات المُعرَّفة في config."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"class\": \"App\\\\Models\\\\Customer\",\n      \"name\": \"Customer\",\n      \"table\": \"customers\",\n      \"primary_key\": \"id\",\n      \"has_soft_deletes\": true,\n      \"fillable\": [\"name\", \"email\", \"phone\", \"tax_number\", \"is_active\"]\n    },\n    {\n      \"class\": \"App\\\\Models\\\\Product\",\n      \"name\": \"Product\",\n      \"table\": \"products\",\n      \"primary_key\": \"id\",\n      \"has_soft_deletes\": false,\n      \"fillable\": [\"sku\", \"name\", \"price\", \"stock_quantity\", \"category_id\"]\n    }\n  ]\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Analyze Model",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"App\\\\Models\\\\Customer\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/analyze-model",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "analyze-model"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`\n\nيُحلِّل نموذج Eloquent ويُعيد تفاصيله (columns, relationships, casts...).\n\n🔒 يقبل فقط الـ classes الموجودة في نتيجة `detect-models`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"class\": \"App\\\\Models\\\\Customer\",\n    \"name\": \"Customer\",\n    \"table\": \"customers\",\n    \"primary_key\": \"id\",\n    \"has_soft_deletes\": true,\n    \"fillable\": [\"name\", \"email\", \"phone\", \"tax_number\", \"is_active\"],\n    \"casts\": {\n      \"is_active\": \"boolean\",\n      \"created_at\": \"datetime\"\n    },\n    \"columns\": [\n      { \"name\": \"id\",          \"type\": \"bigint\",   \"nullable\": false },\n      { \"name\": \"name\",        \"type\": \"varchar\",  \"nullable\": false },\n      { \"name\": \"email\",       \"type\": \"varchar\",  \"nullable\": true  },\n      { \"name\": \"tax_number\",  \"type\": \"varchar\",  \"nullable\": true  },\n      { \"name\": \"is_active\",   \"type\": \"tinyint\",  \"nullable\": false },\n      { \"name\": \"created_at\",  \"type\": \"timestamp\",\"nullable\": true  }\n    ],\n    \"relationships\": [\"orders\", \"invoices\", \"addresses\"]\n  }\n}"
+            }
+          ]
+        }
+
+      ]
+    },
+
+    {
+      "name": "🔀 Field Mappings",
+      "description": "تعيين الحقول بين نماذج Laravel وكيانات ERP مع دعم التحويلات.\n\n**الصلاحيات:**\n- `view_sync_profiles` — قراءة\n- `manage_sync_profiles` — إنشاء / تعديل / حذف\n\n**التحويلات المتاحة:** uppercase, lowercase, trim, date_format, number_format, boolean, concatenate, split, lookup, custom",
+      "item": [
+
+        {
+          "name": "List Field Mappings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/{{profile_id}}/mappings",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "{{profile_id}}", "mappings"]
+            },
+            "description": "**الصلاحية:** `view_sync_profiles`\n\nيُعيد جميع mappings مُرتَّبة حسب `sort_order`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"source_field\": \"name\",\n      \"destination_field\": \"displayName\",\n      \"transformation\": \"none\",\n      \"transformation_config\": null,\n      \"default_value\": null,\n      \"is_required\": true,\n      \"is_ignored\": false,\n      \"is_key_field\": false,\n      \"sort_order\": 0\n    },\n    {\n      \"id\": 2,\n      \"source_field\": \"email\",\n      \"destination_field\": \"email\",\n      \"transformation\": \"lowercase\",\n      \"transformation_config\": null,\n      \"is_required\": false,\n      \"sort_order\": 1\n    },\n    {\n      \"id\": 3,\n      \"source_field\": \"birth_date\",\n      \"destination_field\": \"birthDate\",\n      \"transformation\": \"date_format\",\n      \"transformation_config\": { \"format\": \"Y-m-d\" },\n      \"sort_order\": 2\n    }\n  ]\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Save Field Mappings (Batch)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mappings\": [\n    {\n      \"source_field\": \"name\",\n      \"destination_field\": \"displayName\",\n      \"transformation\": \"none\",\n      \"is_required\": true,\n      \"is_key_field\": false\n    },\n    {\n      \"source_field\": \"email\",\n      \"destination_field\": \"email\",\n      \"transformation\": \"lowercase\",\n      \"is_required\": false\n    },\n    {\n      \"source_field\": \"code\",\n      \"destination_field\": \"number\",\n      \"transformation\": \"uppercase\",\n      \"is_required\": true,\n      \"is_key_field\": true\n    },\n    {\n      \"source_field\": \"phone\",\n      \"destination_field\": \"phoneNumber\",\n      \"transformation\": \"none\",\n      \"default_value\": \"\"\n    },\n    {\n      \"source_field\": \"birth_date\",\n      \"destination_field\": \"birthDate\",\n      \"transformation\": \"date_format\",\n      \"transformation_config\": { \"format\": \"Y-m-d\" }\n    },\n    {\n      \"source_field\": \"balance\",\n      \"destination_field\": \"balance\",\n      \"transformation\": \"number_format\",\n      \"transformation_config\": { \"decimals\": 2, \"return_type\": \"float\" }\n    },\n    {\n      \"source_field\": \"status\",\n      \"destination_field\": \"status\",\n      \"transformation\": \"lookup\",\n      \"transformation_config\": {\n        \"map\": { \"1\": \"Active\", \"0\": \"Inactive\", \"2\": \"Blocked\" },\n        \"default\": \"Unknown\"\n      }\n    },\n    {\n      \"source_field\": \"internal_notes\",\n      \"destination_field\": \"internalNotes\",\n      \"transformation\": \"none\",\n      \"is_ignored\": true\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/{{profile_id}}/mappings",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "{{profile_id}}", "mappings"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`\n\n⚠️ يحذف جميع mappings الموجودة ويُعيد إنشاءها (batch replace).\n\n**transformation_config حسب النوع:**\n- `date_format`: `{ \"format\": \"Y-m-d\" }`\n- `number_format`: `{ \"decimals\": 2, \"thousands_sep\": \",\", \"return_type\": \"float|int|string\" }`\n- `boolean`: `{ \"true_values\": [1, \"yes\", \"active\"], \"false_values\": [0, \"no\"], \"output\": \"bool|int|string|yn\" }`\n- `concatenate`: `{ \"parts\": [\"first_name\", \" \", \"last_name\"], \"prefix\": \"\", \"suffix\": \"\" }`\n- `split`: `{ \"delimiter\": \" \", \"index\": 0 }`\n- `lookup`: `{ \"map\": { \"key\": \"value\" }, \"default\": \"\" }`\n- `trim`: `{ \"characters\": null }`"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Single Mapping",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transformation\": \"uppercase\",\n  \"is_required\": true,\n  \"notes\": \"كود العميل يجب أن يكون بأحرف كبيرة في BC\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/{{profile_id}}/mappings/{{mapping_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "{{profile_id}}", "mappings", "{{mapping_id}}"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`\n\n🔒 `custom_transformer` يُقبل فقط الـ classes المُسجَّلة في `config('erp-integration-hub.allowed_transformers')`."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Delete Mapping",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/{{profile_id}}/mappings/{{mapping_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "{{profile_id}}", "mappings", "{{mapping_id}}"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Preview Mapping",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sample\": {\n    \"id\": 42,\n    \"name\": \"أحمد محمد\",\n    \"email\": \"AHMED@EXAMPLE.COM\",\n    \"code\": \"cust-001\",\n    \"phone\": \"+966501234567\",\n    \"birth_date\": \"1990-05-15\",\n    \"balance\": 15750.567,\n    \"status\": \"1\"\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/{{profile_id}}/mappings/preview",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "{{profile_id}}", "mappings", "preview"]
+            },
+            "description": "**الصلاحية:** `view_sync_profiles`\n\nيُطبِّق جميع التحويلات على سجل تجريبي ويُعيد النتيجة بدون حفظ أي بيانات في ERP."
+          },
+          "response": [
+            {
+              "name": "200 OK — Preview Result",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"success\": true,\n    \"source\": {\n      \"name\": \"أحمد محمد\",\n      \"email\": \"AHMED@EXAMPLE.COM\",\n      \"code\": \"cust-001\",\n      \"birth_date\": \"1990-05-15\",\n      \"balance\": 15750.567,\n      \"status\": \"1\"\n    },\n    \"mapped\": {\n      \"displayName\": \"أحمد محمد\",\n      \"email\": \"ahmed@example.com\",\n      \"number\": \"CUST-001\",\n      \"phoneNumber\": \"+966501234567\",\n      \"birthDate\": \"1990-05-15\",\n      \"balance\": 15750.57,\n      \"status\": \"Active\"\n    }\n  }\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Auto-Map Fields",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_fields\": [\"name\", \"email\", \"phone\", \"tax_number\", \"birth_date\", \"code\"],\n  \"destination_fields\": [\"displayName\", \"email\", \"phoneNumber\", \"taxRegistrationNumber\", \"birthDate\", \"number\", \"currencyCode\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync-profiles/{{profile_id}}/mappings/auto-map",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync-profiles", "{{profile_id}}", "mappings", "auto-map"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`\n\nيقترح تعيينات تلقائية بناءً على تشابه أسماء الحقول (fuzzy matching)."
+          },
+          "response": [
+            {
+              "name": "200 OK — Suggestions",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    { \"source_field\": \"name\",       \"destination_field\": \"displayName\",           \"confidence\": 57, \"transformation\": \"none\" },\n    { \"source_field\": \"email\",      \"destination_field\": \"email\",                  \"confidence\": 100, \"transformation\": \"none\" },\n    { \"source_field\": \"phone\",      \"destination_field\": \"phoneNumber\",            \"confidence\": 71, \"transformation\": \"none\" },\n    { \"source_field\": \"tax_number\", \"destination_field\": \"taxRegistrationNumber\",  \"confidence\": 48, \"transformation\": \"none\" },\n    { \"source_field\": \"birth_date\", \"destination_field\": \"birthDate\",              \"confidence\": 62, \"transformation\": \"none\" },\n    { \"source_field\": \"code\",       \"destination_field\": \"number\",                 \"confidence\": 33, \"transformation\": \"none\" }\n  ]\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "List Available Transformers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/field-mapping/transformers",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "field-mapping", "transformers"]
+            },
+            "description": "**الصلاحية:** `view_sync_profiles`\n\nيُعيد قائمة جميع التحويلات المتاحة."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    { \"value\": \"none\",          \"label\": \"None\" },\n    { \"value\": \"uppercase\",     \"label\": \"Uppercase\" },\n    { \"value\": \"lowercase\",     \"label\": \"Lowercase\" },\n    { \"value\": \"trim\",          \"label\": \"Trim\" },\n    { \"value\": \"date_format\",   \"label\": \"Date Format\" },\n    { \"value\": \"number_format\", \"label\": \"Number Format\" },\n    { \"value\": \"boolean\",       \"label\": \"Boolean\" },\n    { \"value\": \"concatenate\",   \"label\": \"Concatenate\" },\n    { \"value\": \"split\",         \"label\": \"Split\" },\n    { \"value\": \"lookup\",        \"label\": \"Lookup\" },\n    { \"value\": \"custom\",        \"label\": \"Custom\" }\n  ]\n}"
+            }
+          ]
+        }
+
+      ]
+    },
+
+    {
+      "name": "⚡ Sync Operations",
+      "description": "تشغيل وإدارة عمليات المزامنة.\n\n**الصلاحيات:**\n- `run_sync` — تشغيل\n- `cancel_sync` — إلغاء\n- `retry_sync` — إعادة محاولة\n- `view_logs` — متابعة الحالة",
+      "item": [
+
+        {
+          "name": "Run Sync (Async)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"async\": true,\n  \"trigger\": \"manual\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync/run/{{profile_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync", "run", "{{profile_id}}"]
+            },
+            "description": "**الصلاحية:** `run_sync`\n\n**async=true:** يضع الـ sync في Queue ويُعيد `log_id` للمتابعة.\n\n**async=false:** يُشغِّل الـ sync بشكل متزامن (مناسب للسجلات القليلة فقط).\n\n**trigger:** `manual` | `scheduled` | `api` | `webhook`"
+          },
+          "response": [
+            {
+              "name": "200 OK — Queued",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Sync job queued successfully.\",\n  \"log_id\": 47,\n  \"async\": true\n}"
+            },
+            {
+              "name": "422 — Already Running",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"success\": false,\n  \"message\": \"A sync is already running for this profile.\"\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Run Sync (Sync — Small Datasets)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"async\": false,\n  \"trigger\": \"manual\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync/run/{{profile_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync", "run", "{{profile_id}}"]
+            },
+            "description": "⚠️ للاستخدام مع datasets صغيرة فقط (< 500 سجل). الطلب سيبقى معلقاً حتى انتهاء المزامنة."
+          },
+          "response": [
+            {
+              "name": "200 OK — Completed",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Sync completed.\",\n  \"log_id\": 48,\n  \"async\": false\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Get Sync Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync/status/{{log_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync", "status", "{{log_id}}"]
+            },
+            "description": "**الصلاحية:** `view_logs`\n\nيُستخدَم للـ polling بعد `run` async. استدعِه كل 3-5 ثوانٍ حتى يكون `status` = `completed` أو `failed`."
+          },
+          "response": [
+            {
+              "name": "200 OK — Running",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 47,\n    \"status\": \"running\",\n    \"progress\": 64.5,\n    \"processed_records\": 322,\n    \"total_records\": 499,\n    \"success_records\": 318,\n    \"failed_records\": 4,\n    \"duration\": \"00:02:14\"\n  }\n}"
+            },
+            {
+              "name": "200 OK — Completed",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 47,\n    \"status\": \"completed\",\n    \"progress\": 100.0,\n    \"processed_records\": 499,\n    \"total_records\": 499,\n    \"success_records\": 495,\n    \"failed_records\": 4,\n    \"duration\": \"00:03:41\"\n  }\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Cancel Sync",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync/cancel/{{log_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync", "cancel", "{{log_id}}"]
+            },
+            "description": "**الصلاحية:** `cancel_sync`\n\nيُوقف sync بحالة `pending` أو `running`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{ \"message\": \"Sync cancelled.\" }"
+            }
+          ]
+        },
+
+        {
+          "name": "Retry Failed Sync (Single)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync/retry/{{failed_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync", "retry", "{{failed_id}}"]
+            },
+            "description": "**الصلاحية:** `retry_sync`\n\nيُعيد محاولة سجل فاشل واحد. يفشل إذا وصل `attempt_count >= max_attempts`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"message\": \"Retry queued.\" }"
+            },
+            {
+              "name": "422 — Max Attempts",
+              "code": 422,
+              "body": "{ \"error\": \"Cannot retry — max attempts reached.\" }"
+            }
+          ]
+        },
+
+        {
+          "name": "Retry All Failed — Profile",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync/retry-profile/{{profile_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync", "retry-profile", "{{profile_id}}"]
+            },
+            "description": "**الصلاحية:** `retry_sync`\n\nيُعيد محاولة جميع السجلات الفاشلة لملف مزامنة محدد."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"message\": \"12 failed sync(s) queued for retry.\" }"
+            }
+          ]
+        },
+
+        {
+          "name": "Retry All Failed — System-Wide",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/sync/retry-all",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "sync", "retry-all"]
+            },
+            "description": "**الصلاحية:** `retry_sync`\n\n⚠️ يُعيد محاولة جميع السجلات الفاشلة في النظام بالكامل. استخدم بحذر في الإنتاج."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"message\": \"87 failed sync(s) queued for retry.\" }"
+            }
+          ]
+        }
+
+      ]
+    },
+
+    {
+      "name": "🕐 Scheduler",
+      "description": "إدارة الجداول الزمنية لتشغيل المزامنة تلقائياً.\n\n**الصلاحية:** `manage_sync_profiles`\n\n**الترددات المتاحة:** every_minute, every_5_minutes, every_15_minutes, every_30_minutes, hourly, every_6_hours, every_12_hours, daily, weekly, monthly, custom",
+      "item": [
+
+        {
+          "name": "List Active Schedules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/scheduler",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "scheduler"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"sync_profile_id\": 1,\n      \"label\": \"Daily Customer Sync\",\n      \"frequency\": \"daily\",\n      \"cron_expression\": \"0 2 * * *\",\n      \"timezone\": \"Asia/Riyadh\",\n      \"is_active\": true,\n      \"last_run_at\": \"2026-06-10T02:00:05.000000Z\",\n      \"next_run_at\": \"2026-06-11T02:00:00.000000Z\",\n      \"sync_profile\": { \"id\": 1, \"name\": \"Customers → BC Sync\" }\n    }\n  ]\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Create Schedule",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Daily Customer Sync — 2 AM\",\n  \"frequency\": \"daily\",\n  \"timezone\": \"Asia/Riyadh\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/scheduler/{{profile_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "scheduler", "{{profile_id}}"]
+            },
+            "description": "**frequency:** أحد القيم المُعرَّفة أو `custom` مع `cron_expression`."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Create Custom Cron Schedule",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Weekdays at 8 AM\",\n  \"frequency\": \"custom\",\n  \"cron_expression\": \"0 8 * * 1-5\",\n  \"timezone\": \"Asia/Riyadh\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/scheduler/{{profile_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "scheduler", "{{profile_id}}"]
+            },
+            "description": "**cron_expression:** يتيح ضبط أي جدول زمني باستخدام Cron syntax.\n\nمثال: `0 8 * * 1-5` = كل يوم عمل الساعة 8 صباحاً."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Schedule",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Daily Customer Sync — 3 AM\",\n  \"cron_expression\": \"0 3 * * *\",\n  \"timezone\": \"Asia/Dubai\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/scheduler/{{profile_id}}/{{schedule_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "scheduler", "{{profile_id}}", "{{schedule_id}}"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Toggle Schedule (Enable/Disable)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/scheduler/{{profile_id}}/{{schedule_id}}/toggle",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "scheduler", "{{profile_id}}", "{{schedule_id}}", "toggle"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`\n\nيُبدِّل حالة الجدول بين active / inactive."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"data\": { \"id\": 1, \"is_active\": false },\n  \"message\": \"Schedule toggled.\"\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Delete Schedule",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/scheduler/{{profile_id}}/{{schedule_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "scheduler", "{{profile_id}}", "{{schedule_id}}"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`"
+          },
+          "response": []
+        },
+
+        {
+          "name": "List Frequency Options",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/scheduler/frequency-options",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "scheduler", "frequency-options"]
+            },
+            "description": "**الصلاحية:** `manage_sync_profiles`\n\nيُعيد قائمة الترددات المتاحة مع Cron expressions."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    { \"value\": \"every_minute\",     \"label\": \"Every Minute\",      \"cron\": \"* * * * *\" },\n    { \"value\": \"every_5_minutes\",  \"label\": \"Every 5 Minutes\",   \"cron\": \"*/5 * * * *\" },\n    { \"value\": \"every_15_minutes\", \"label\": \"Every 15 Minutes\",  \"cron\": \"*/15 * * * *\" },\n    { \"value\": \"every_30_minutes\", \"label\": \"Every 30 Minutes\",  \"cron\": \"*/30 * * * *\" },\n    { \"value\": \"hourly\",           \"label\": \"Hourly\",            \"cron\": \"0 * * * *\" },\n    { \"value\": \"every_6_hours\",    \"label\": \"Every 6 Hours\",     \"cron\": \"0 */6 * * *\" },\n    { \"value\": \"every_12_hours\",   \"label\": \"Every 12 Hours\",    \"cron\": \"0 */12 * * *\" },\n    { \"value\": \"daily\",            \"label\": \"Daily\",             \"cron\": \"0 0 * * *\" },\n    { \"value\": \"weekly\",           \"label\": \"Weekly\",            \"cron\": \"0 0 * * 0\" },\n    { \"value\": \"monthly\",          \"label\": \"Monthly\",           \"cron\": \"0 0 1 * *\" },\n    { \"value\": \"custom\",           \"label\": \"Custom Expression\", \"cron\": null }\n  ]\n}"
+            }
+          ]
+        }
+
+      ]
+    },
+
+    {
+      "name": "📊 Monitoring",
+      "description": "لوحة مراقبة النظام — إحصائيات لحظية وفحص الصحة.\n\n**الصلاحية:** `view_monitoring`",
+      "item": [
+
+        {
+          "name": "Dashboard Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/monitoring/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "monitoring", "dashboard"]
+            },
+            "description": "**الصلاحية:** `view_monitoring`\n\nيُعيد إحصائيات شاملة مع Redis cache (TTL: 30 ثانية)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"connections\": { \"total\": 3, \"active\": 3, \"error\": 0 },\n    \"sync_profiles\": { \"total\": 8, \"active\": 6, \"running\": 1 },\n    \"today\": {\n      \"syncs_run\": 24,\n      \"records_processed\": 18750,\n      \"success_rate\": 98.4,\n      \"avg_duration_ms\": 142000\n    },\n    \"last_30_days\": {\n      \"total_syncs\": 312,\n      \"completed\": 298,\n      \"failed\": 14,\n      \"total_records\": 284500\n    },\n    \"pending_retries\": 7,\n    \"queue_size\": 2\n  }\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "System Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/monitoring/health",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "monitoring", "health"]
+            },
+            "description": "**الصلاحية:** `view_monitoring`\n\n**200** = جميع المكونات سليمة.\n**207 Multi-Status** = بعض المكونات تحتاج انتباهاً."
+          },
+          "response": [
+            {
+              "name": "200 — All Healthy",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"queue\": { \"status\": \"healthy\", \"size\": 2, \"message\": \"Queue is processing normally\" },\n    \"connections\": { \"status\": \"healthy\", \"active\": 3, \"total\": 3 },\n    \"failed_jobs\": { \"status\": \"healthy\", \"count\": 7, \"threshold\": 10 },\n    \"database\": { \"status\": \"healthy\" },\n    \"cache\": { \"status\": \"healthy\" }\n  }\n}"
+            },
+            {
+              "name": "207 — Degraded",
+              "code": 207,
+              "body": "{\n  \"data\": {\n    \"queue\": { \"status\": \"warning\", \"size\": 1250, \"message\": \"Queue size exceeds threshold (1000)\" },\n    \"connections\": { \"status\": \"warning\", \"active\": 2, \"total\": 3, \"error\": 1 },\n    \"failed_jobs\": { \"status\": \"critical\", \"count\": 47, \"threshold\": 10 }\n  }\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Chart Data (Last 14 Days)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/monitoring/chart-data",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "monitoring", "chart-data"]
+            },
+            "description": "**الصلاحية:** `view_monitoring`\n\nبيانات مُهيَّأة للرسوم البيانية لآخر 14 يوم."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"labels\": [\"Jun 01\", \"Jun 02\", \"Jun 03\", \"...\", \"Jun 14\"],\n    \"syncs\": [18, 22, 19, 25, 21, 0, 0, 23, 20, 24, 19, 22, 21, 24],\n    \"records\": [12400, 15800, 13200, 18900, 14500, 0, 0, 16200, 13800, 18750, 12900, 15400, 14200, 16800],\n    \"failures\": [1, 0, 2, 1, 0, 0, 0, 1, 0, 0, 2, 1, 0, 1]\n  }\n}"
+            }
+          ]
+        }
+
+      ]
+    },
+
+    {
+      "name": "📜 Logs & Failed Jobs",
+      "description": "استعراض سجلات المزامنة والعمليات الفاشلة.\n\n**الصلاحية:** `view_logs`",
+      "item": [
+
+        {
+          "name": "List Sync Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/logs?per_page=20&status=failed&sync_profile_id=1&from=2026-06-01&to=2026-06-10",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "logs"],
+              "query": [
+                { "key": "per_page",         "value": "20",         "description": "عدد النتائج" },
+                { "key": "status",           "value": "failed",     "description": "pending | running | completed | failed | cancelled | partial" },
+                { "key": "sync_profile_id",  "value": "1",          "description": "فلترة حسب الملف" },
+                { "key": "from",             "value": "2026-06-01", "description": "تاريخ البداية (Y-m-d)" },
+                { "key": "to",               "value": "2026-06-10", "description": "تاريخ النهاية (Y-m-d)" }
+              ]
+            },
+            "description": "**الصلاحية:** `view_logs`"
+          },
+          "response": []
+        },
+
+        {
+          "name": "Get Sync Log Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/logs/{{log_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "logs", "{{log_id}}"]
+            },
+            "description": "**الصلاحية:** `view_logs`\n\nيُعيد التفاصيل الكاملة مع `failed_syncs` المرتبطة."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 47,\n    \"batch_id\": \"01J3X8K...\",\n    \"sync_profile\": { \"id\": 1, \"name\": \"Customers → BC Sync\" },\n    \"connection\": { \"id\": 1, \"name\": \"Dynamics 365 BC Production\" },\n    \"trigger\": \"manual\",\n    \"status\": \"completed\",\n    \"started_at\": \"2026-06-10T10:30:00.000000Z\",\n    \"completed_at\": \"2026-06-10T10:33:41.000000Z\",\n    \"duration\": \"00:03:41\",\n    \"duration_ms\": 221000,\n    \"total_records\": 499,\n    \"processed_records\": 499,\n    \"success_records\": 495,\n    \"failed_records\": 4,\n    \"skipped_records\": 0,\n    \"message\": null,\n    \"errors\": [],\n    \"triggered_by\": { \"id\": 1, \"name\": \"Admin\" },\n    \"failed_syncs\": [\n      {\n        \"id\": 12,\n        \"record_id\": \"1042\",\n        \"error_message\": \"Required field [taxRegistrationNumber] is missing in source record.\",\n        \"attempt_count\": 1,\n        \"status\": \"pending_retry\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Log Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/logs/statistics",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "logs", "statistics"]
+            },
+            "description": "**الصلاحية:** `view_logs`\n\nإحصائيات آخر 30 يوم."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"total\": 312,\n    \"completed\": 298,\n    \"failed\": 14,\n    \"pending\": 0,\n    \"total_records_processed\": 284500,\n    \"avg_duration_ms\": 145200,\n    \"success_rate\": 95.5\n  }\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "List Failed Jobs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/logs/failed-jobs?status=pending_retry&profile_id=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "logs", "failed-jobs"],
+              "query": [
+                { "key": "status",     "value": "pending_retry", "description": "pending_retry | retrying | resolved | abandoned" },
+                { "key": "profile_id", "value": "1",             "description": "فلترة حسب الملف" },
+                { "key": "per_page",   "value": "20" }
+              ]
+            },
+            "description": "**الصلاحية:** `view_logs`\n\nيُعيد السجلات الفاشلة التي تنتظر إعادة المحاولة."
+          },
+          "response": []
+        },
+
+        {
+          "name": "Export Logs as CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/logs/export?status=failed&from=2026-06-01&to=2026-06-10",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "logs", "export"],
+              "query": [
+                { "key": "status", "value": "failed",      "description": "فلترة بالحالة" },
+                { "key": "from",   "value": "2026-06-01" },
+                { "key": "to",     "value": "2026-06-10" }
+              ]
+            },
+            "description": "**الصلاحية:** `view_logs`\n\nيُصدِّر السجلات كـ CSV عبر StreamedResponse (يدعم عدد غير محدود من السجلات). يحمّل الملف مباشرةً."
+          },
+          "response": [
+            {
+              "name": "200 OK — CSV Download",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type",        "value": "text/csv" },
+                { "key": "Content-Disposition", "value": "attachment; filename=sync_logs.csv" }
+              ],
+              "body": "ID,Profile,Status,Total,Success,Failed,Duration,Started At\n47,\"Customers → BC Sync\",completed,499,495,4,00:03:41,2026-06-10 10:30:00\n46,\"Products → BC Sync\",failed,120,0,120,00:00:12,2026-06-09 09:15:00"
+            }
+          ]
+        }
+
+      ]
+    },
+
+    {
+      "name": "⚙️ Settings",
+      "description": "إدارة إعدادات النظام.\n\n**الصلاحية:** `manage_settings`\n\nيُعيد فقط الإعدادات ذات `is_public = true`.",
+      "item": [
+
+        {
+          "name": "List All Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/settings",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "settings"]
+            },
+            "description": "**الصلاحية:** `manage_settings`\n\nيُعيد جميع الإعدادات مُجمَّعة حسب `group`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"sync\": [\n      { \"key\": \"sync.default_chunk_size\", \"value\": \"500\",   \"type\": \"integer\", \"description\": \"Default chunk size for sync operations\" },\n      { \"key\": \"sync.retry_delay_seconds\", \"value\": \"60\",   \"type\": \"integer\", \"description\": \"Delay between retry attempts\" },\n      { \"key\": \"sync.parallel_workers\",    \"value\": \"4\",    \"type\": \"integer\", \"description\": \"Number of parallel workers\" }\n    ],\n    \"notifications\": [\n      { \"key\": \"notifications.enabled\",    \"value\": \"true\",  \"type\": \"boolean\", \"description\": \"Enable/disable notifications\" },\n      { \"key\": \"notifications.mail_to\",    \"value\": \"admin@example.com\", \"type\": \"string\" }\n    ],\n    \"monitoring\": [\n      { \"key\": \"monitoring.retention_days\", \"value\": \"90\",  \"type\": \"integer\", \"description\": \"Log retention in days\" }\n    ]\n  }\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Update Settings (Batch)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": {\n    \"sync.default_chunk_size\": 1000,\n    \"sync.retry_delay_seconds\": 120,\n    \"notifications.enabled\": true,\n    \"notifications.mail_to\": \"erp-admin@company.com\",\n    \"monitoring.retention_days\": 180\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/settings",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "settings"]
+            },
+            "description": "**الصلاحية:** `manage_settings`\n\nيُحدِّث عدة إعدادات دفعةً واحدة."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"message\": \"Settings saved.\" }"
+            }
+          ]
+        },
+
+        {
+          "name": "Get Single Setting",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{api_prefix}}/settings/sync.default_chunk_size",
+              "host": ["{{base_url}}"],
+              "path": ["{{api_prefix}}", "settings", "sync.default_chunk_size"]
+            },
+            "description": "**الصلاحية:** `manage_settings`\n\nيُعيد قيمة إعداد واحد بمفتاحه."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"data\": \"1000\" }"
+            }
+          ]
+        }
+
+      ]
+    },
+
+    {
+      "name": "🔑 Authentication (Sanctum)",
+      "description": "الحصول على Sanctum Token للاستخدام في جميع الطلبات.\n\n**بعد الحصول على الـ token:** انسخه في متغير `token` في الـ Collection Variables.",
+      "item": [
+
+        {
+          "name": "Login & Get Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) {",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    console.log('✅ Token saved:', json.token.substring(0, 20) + '...');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"your-password\",\n  \"device_name\": \"Postman — ERP Integration Hub\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/sanctum/token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sanctum", "token"]
+            },
+            "description": "يُولِّد Sanctum token ويحفظه تلقائياً في `{{token}}` عبر الـ Tests script.\n\n**المتطلبات:** المستخدم يجب أن يملك أحد الأدوار: `erp_admin` | `erp_operator` | `erp_viewer`"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"token\": \"1|abc123def456ghi789jkl012mno345pqr678stu901\"\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Logout (Revoke Token)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/sanctum/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sanctum", "logout"]
+            },
+            "description": "يُبطل الـ token الحالي."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"message\": \"Logged out successfully.\" }"
+            }
+          ]
+        }
+
+      ]
+    }
+
+  ]
+}

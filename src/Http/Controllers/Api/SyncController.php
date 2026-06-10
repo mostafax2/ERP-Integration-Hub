@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Mostafax\ErpIntegrationHub\Actions\RetryFailedSyncAction;
 use Mostafax\ErpIntegrationHub\Actions\RunSyncAction;
 use Mostafax\ErpIntegrationHub\Models\FailedSync;
@@ -20,20 +23,24 @@ class SyncController extends Controller
 
     public function run(int $profileId, Request $request): JsonResponse
     {
+        $this->authorize('run_sync');
+
         $profile = SyncProfile::findOrFail($profileId);
         $result  = $this->runSyncAction->execute(
             $profile,
             $request->input('trigger', 'manual'),
             $request->boolean('async', true),
-            auth()->user()
+            Auth::user()
         );
         return response()->json($result, $result['success'] ? 200 : 422);
     }
 
     public function cancel(int $logId): JsonResponse
     {
+        $this->authorize('cancel_sync');
+
         $log = SyncLog::findOrFail($logId);
-        if (! in_array($log->status, ['pending', 'running'])) {
+        if (! in_array($log->status, ['pending', 'running'], strict: true)) {
             return response()->json(['error' => 'Log is not in a cancellable state.'], 422);
         }
         $log->update(['status' => 'cancelled', 'completed_at' => now()]);
@@ -42,6 +49,8 @@ class SyncController extends Controller
 
     public function retryOne(int $failedId): JsonResponse
     {
+        $this->authorize('retry_sync');
+
         $failed  = FailedSync::findOrFail($failedId);
         $success = $this->retryAction->retryOne($failed);
         return response()->json($success
@@ -51,6 +60,8 @@ class SyncController extends Controller
 
     public function retryProfile(int $profileId): JsonResponse
     {
+        $this->authorize('retry_sync');
+
         $profile = SyncProfile::findOrFail($profileId);
         $count   = $this->retryAction->retryProfile($profile);
         return response()->json(['message' => "{$count} failed sync(s) queued for retry."]);
@@ -58,12 +69,16 @@ class SyncController extends Controller
 
     public function retryAll(): JsonResponse
     {
+        $this->authorize('retry_sync');
+
         $count = $this->retryAction->retryAll();
         return response()->json(['message' => "{$count} failed sync(s) queued for retry."]);
     }
 
     public function status(int $logId): JsonResponse
     {
+        $this->authorize('view_logs');
+
         $log = SyncLog::with('failedSyncs')->findOrFail($logId);
         return response()->json([
             'data' => [

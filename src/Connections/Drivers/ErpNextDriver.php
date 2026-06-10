@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Connections\Drivers;
 
 /**
@@ -20,8 +22,9 @@ class ErpNextDriver extends AbstractDynamicsDriver
             $apiKey    = $extra['api_key']    ?? $this->connection->client_id;
             $apiSecret = $this->connection->decrypted_client_secret;
 
+            // ERPNext uses "token key:secret" scheme, not Bearer
+            $this->authScheme  = 'token';
             $this->accessToken = base64_encode("{$apiKey}:{$apiSecret}");
-            // Validate by fetching user info
             $this->get('User/me');
             $this->connection->markAsConnected();
             return true;
@@ -29,11 +32,6 @@ class ErpNextDriver extends AbstractDynamicsDriver
             $this->connection->markAsError($e->getMessage());
             return false;
         }
-    }
-
-    protected function resolveHeaders(): array
-    {
-        return ['Authorization' => "token {$this->accessToken}"];
     }
 
     public function fetchEntities(): array

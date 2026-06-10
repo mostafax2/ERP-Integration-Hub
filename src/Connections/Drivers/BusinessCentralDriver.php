@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Connections\Drivers;
 
 class BusinessCentralDriver extends AbstractDynamicsDriver

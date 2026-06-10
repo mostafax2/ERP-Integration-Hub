@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Connections\Drivers;
 
 /**
@@ -19,11 +21,11 @@ class CustomDriver extends AbstractDynamicsDriver
             $extra  = $this->connection->extra_config ?? [];
             $authType = $extra['auth_type'] ?? 'bearer'; // bearer, basic, api_key, none
 
-            $this->accessToken = match ($authType) {
-                'basic'   => base64_encode("{$this->connection->client_id}:{$this->connection->decrypted_client_secret}"),
-                'api_key' => $this->connection->decrypted_client_secret,
-                'bearer'  => $this->tokenManager->getToken($this->connection),
-                default   => '',
+            [$this->authScheme, $this->accessToken] = match ($authType) {
+                'basic'   => ['Basic',  base64_encode("{$this->connection->client_id}:{$this->connection->decrypted_client_secret}")],
+                'api_key' => ['Bearer', $this->connection->decrypted_client_secret],
+                'bearer'  => ['Bearer', $this->tokenManager->getToken($this->connection)],
+                default   => ['', ''],
             };
 
             if ($extra['test_endpoint'] ?? null) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Connections\Drivers;
 
 use GuzzleHttp\Client;
@@ -14,6 +16,7 @@ abstract class AbstractDynamicsDriver implements ConnectionInterface
     protected Client $http;
     protected string $baseUrl;
     protected ?string $accessToken = null;
+    protected string $authScheme = 'Bearer';
 
     public function __construct(
         protected DynamicsConnection $connection,
@@ -73,7 +76,7 @@ abstract class AbstractDynamicsDriver implements ConnectionInterface
         $token ??= $this->ensureToken();
         try {
             $response = $this->http->get($endpoint, [
-                'headers' => ['Authorization' => "Bearer {$token}"],
+                'headers' => ['Authorization' => "{$this->authScheme} {$token}"],
                 'query'   => $params,
             ]);
             return json_decode($response->getBody()->getContents(), true) ?? [];
@@ -87,7 +90,7 @@ abstract class AbstractDynamicsDriver implements ConnectionInterface
         $token ??= $this->ensureToken();
         try {
             $response = $this->http->post($endpoint, [
-                'headers' => ['Authorization' => "Bearer {$token}"],
+                'headers' => ['Authorization' => "{$this->authScheme} {$token}"],
                 'json'    => $data,
             ]);
             return json_decode($response->getBody()->getContents(), true) ?? [];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\FieldMapping;
 
 use Mostafax\ErpIntegrationHub\Contracts\FieldMapperInterface;
@@ -102,9 +104,15 @@ class FieldMappingEngine implements FieldMapperInterface
 
     private function applyCustomTransformer(string $transformer, mixed $value, FieldMappingDTO $mapping): mixed
     {
-        if (class_exists($transformer)) {
-            return app($transformer)->transform($value, $mapping->transformationConfig);
+        $allowed = config('erp-integration-hub.allowed_transformers', []);
+
+        if (! in_array($transformer, $allowed, strict: true)) {
+            throw new \InvalidArgumentException(
+                "Custom transformer [{$transformer}] is not in the allowed_transformers list. " .
+                "Register it in config('erp-integration-hub.allowed_transformers')."
+            );
         }
-        return $value;
+
+        return app($transformer)->transform($value, $mapping->transformationConfig);
     }
 }

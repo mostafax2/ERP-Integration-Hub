@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create(config('erp-integration-hub.tables.sync_logs', 'dynamics_sync_logs'), function (Blueprint $table) {
             $table->id();
-            $table->string('batch_id')->nullable()->index(); // links to BPE batch
+            $table->string('batch_id')->nullable(); // links to BPE batch
             $table->foreignId('sync_profile_id')->nullable()->constrained('dynamics_sync_profiles')->nullOnDelete();
             $table->foreignId('connection_id')->nullable()->constrained('dynamics_connections')->nullOnDelete();
 

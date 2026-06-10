@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mostafax\ErpIntegrationHub\Services;
 
 use Illuminate\Support\LazyCollection;
@@ -15,6 +17,10 @@ use Mostafax\ErpIntegrationHub\Models\SyncProfile;
 
 class SyncOrchestrator
 {
+    private const ALLOWED_FILTER_OPERATORS = [
+        '=', '!=', '<>', '>', '<', '>=', '<=', 'like', 'not like', 'in', 'not in',
+    ];
+
     public function __construct(
         private readonly ErpConnectionManager $connectionManager
     ) {}
@@ -31,7 +37,9 @@ class SyncOrchestrator
             }
 
             $driver = $this->connectionManager->driver($connection);
-            $driver->connect();
+            if (! $driver->connect()) {
+                throw new SyncException("Failed to authenticate with ERP [{$connection->name}]. Check credentials.");
+            }
 
             $mapper      = new FieldMappingEngine($profile);
             $chunkSize   = $profile->chunk_size ?: config('erp-integration-hub.sync.default_chunk_size', 500);
@@ -96,9 +104,12 @@ class SyncOrchestrator
 
         $query = $modelClass::query();
 
-        // Apply source filters
         foreach ($profile->source_filters ?? [] as $filter) {
-            $query->where($filter['field'], $filter['operator'] ?? '=', $filter['value']);
+            $op = strtolower((string) ($filter['operator'] ?? '='));
+            if (! in_array($op, self::ALLOWED_FILTER_OPERATORS, strict: true)) {
+                throw new SyncException("Disallowed filter operator [{$op}] in sync profile [{$profile->name}].");
+            }
+            $query->where($filter['field'], $op, $filter['value']);
         }
 
         // Incremental sync: only changed records since last sync
